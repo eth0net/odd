@@ -7,6 +7,7 @@ import {
 } from "@mui/icons-material";
 
 import { useTargetValue } from "../../hooks/useTargetValue";
+import { useMemo, useState } from "react";
 
 export function EasyIcon(props) {
   return <CircleOutlined sx={{ color: "limegreen" }} {...props} />;
@@ -186,27 +187,138 @@ const sheets = {
     ],
     bosses: ["Dragon", "Yeti", "Hydra", "Lich", "Minotaur"],
   },
-  forest: {},
+  forest: {
+    groups: [
+      {
+        name: "BASIC",
+        talents: [
+          {
+            description: "Start each game with any one Basic Skill.",
+            points: [6],
+          },
+          {
+            description: "You have one extra health.",
+            points: [6, 4],
+          },
+          {
+            description: "You may have one extra skill or item.",
+            points: [6, 4, 4],
+          },
+        ],
+      },
+      {
+        name: "AWARENESS",
+        talents: [
+          {
+            description: "Once per floor, discard an open door.",
+            points: [6],
+          },
+          {
+            description: "When you replace an item/skill, heal one damage.",
+            points: [6, 2],
+          },
+          {
+            description: "Ignore the first damage from stairs each floor.",
+            points: [6, 4],
+          },
+          {
+            description: "Increase your resist poison rolls by 1.",
+            points: [6, 4, 4],
+          },
+        ],
+      },
+      {
+        name: "AGGRESSION",
+        talents: [
+          {
+            description: "Reroll two dice.",
+            encounters: ["combat"],
+            points: [6],
+          },
+          {
+            description: "Gain [melee]2 or [magic]2 or [agility]2.",
+            encounters: ["combat", "peril"],
+            points: [6, 2],
+          },
+          {
+            description: "Roll [hero].",
+            encounters: ["combat"],
+            points: [6, 4],
+          },
+          {
+            description: "Reduce each large box by 1.",
+            encounters: ["combat"],
+            points: [6, 4, 4],
+          },
+        ],
+      },
+      {
+        name: "SAVVY",
+        talents: [
+          {
+            description: "Swap the values of two dice.",
+            encounters: ["combat"],
+            points: [6],
+          },
+          {
+            description: "Increase a [hero] by 1.",
+            encounters: ["combat", "peril"],
+            points: [6, 2],
+          },
+          {
+            description: "Use two dice to fill a small challenge box.",
+            encounters: ["combat"],
+            points: [6, 4],
+          },
+          {
+            description: "Reduce each armor box by 1.",
+            encounters: ["combat"],
+            points: [6, 4, 4],
+          },
+        ],
+      },
+    ],
+    bosses: ["Golem", "Poison", "Tree", "Giant", "Dragon"],
+  },
 };
 
-export function Talent({ name, talent, ...rest }) {
+export function Talent({ name, description, ...rest }) {
   return (
-    <Stack direction="row" {...rest}>
-      {talent?.name && <Typography>{talent?.name}:</Typography>}
-      <Typography>{talent?.description}</Typography>
+    <Stack direction="row" spacing={1} {...rest}>
+      {name && <Typography fontWeight="bold">{name}:</Typography>}
+      <Typography>{description}</Typography>
     </Stack>
   );
 }
 
-export function CampaignSheetGroup({ group }) {
+export function Group({ name, talents = [] }) {
+  const mapper = (talent, idx) => <Talent {...talent} key={idx} />;
+
   return (
-    <Stack direction="row">
-      <Typography>{group?.name}</Typography>
-      <Stack>
-        {group?.talents.map((talent, key) => (
-          <Talent {...{ talent, key }} />
-        ))}
+    <Stack direction="row" spacing={1}>
+      <Typography
+        border={1}
+        borderRadius={2}
+        padding={1}
+        textAlign="center"
+        sx={{ transform: "rotate(180deg)", writingMode: "vertical-rl" }}
+      >
+        {name}
+      </Typography>
+      <Stack border={1} borderRadius={2} padding={1} flex={1}>
+        {talents.map(mapper)}
       </Stack>
+    </Stack>
+  );
+}
+
+const groupMapper = (group, idx) => <Group {...group} key={idx} />;
+
+export function CampaignSheetFooter() {
+  return (
+    <Stack>
+      <Stack direction="row">{/*bosses*/}</Stack>
+      <Stack direction="row">{/*games played*/}</Stack>
     </Stack>
   );
 }
@@ -215,13 +327,14 @@ export function CampaignSheet() {
   const useHero = useTargetValue("");
   const useName = useTargetValue("");
   const { groups } = sheets.dungeon;
+  const useDefeated = useState([0, 0, 0, 0, 0]);
+  const usePlayed = useState(0);
 
   return (
-    <Stack className="Campaign-sheet">
+    <Stack className="Campaign-sheet" spacing={1} maxWidth="sm">
       <CampaignSheetHead {...{ useHero, useName }} />
-      {groups.map((group, key) => (
-        <CampaignSheetGroup {...{ group, key }} />
-      ))}
+      {groups.map(groupMapper)}
+      <CampaignSheetFooter {...{ useDefeated, usePlayed }} />
     </Stack>
   );
 }

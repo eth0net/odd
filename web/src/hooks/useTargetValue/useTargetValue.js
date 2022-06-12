@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-export function useTargetValue(value) {
-  const [state, setState] = useState(value);
+export function useTargetValue(initialState) {
+  const [state, setState] = useState(initialState);
   const setValue = (e) => setState(e.target.value);
   return [state, setValue];
 }
