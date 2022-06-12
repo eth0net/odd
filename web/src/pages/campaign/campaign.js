@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography } from "@mui/material";
+import { Grid, Stack, TextField, Typography } from "@mui/material";
 import {
   CheckOutlined,
   CircleOutlined,
@@ -7,18 +7,18 @@ import {
 } from "@mui/icons-material";
 
 import { useTargetValue } from "../../hooks/useTargetValue";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-export function EasyIcon(props) {
-  return <CircleOutlined sx={{ color: "limegreen" }} {...props} />;
+export function EasyIcon({ sx = {}, ...rest }) {
+  return <CircleOutlined sx={{ ...sx, color: "limegreen" }} {...rest} />;
 }
 
-export function MediumIcon(props) {
-  return <SquareOutlined sx={{ color: "gold" }} {...props} />;
+export function MediumIcon({ sx = {}, ...rest }) {
+  return <SquareOutlined sx={{ ...sx, color: "gold" }} {...rest} />;
 }
 
-export function HardIcon(props) {
-  return <PentagonOutlined sx={{ color: "red" }} {...props} />;
+export function HardIcon({ sx = {}, ...rest }) {
+  return <PentagonOutlined sx={{ ...sx, color: "red" }} {...rest} />;
 }
 
 export function LabelledIcon({
@@ -282,18 +282,44 @@ const sheets = {
   },
 };
 
-export function Talent({ name, description, ...rest }) {
+const pointMapper = (_, idx) => (
+  <Grid item xs={1} key={idx}>
+    <EasyIcon />
+  </Grid>
+);
+
+const pointsMapper = (point, idx) => (
+  <Grid container columns={point / 2} key={idx}>
+    {[...Array(point)].map(pointMapper)}
+  </Grid>
+);
+
+export function Talent({ name, description, points, ...rest }) {
   return (
-    <Stack direction="row" spacing={1} {...rest}>
-      {name && <Typography fontWeight="bold">{name}:</Typography>}
-      <Typography>{description}</Typography>
-    </Stack>
+    <>
+      <Stack direction="row" className="talent" {...rest}>
+        <Stack direction="row" spacing={1} className="talent-stats">
+          <Stack direction="row" className="talent-points">
+            {points.map(pointsMapper)}
+          </Stack>
+          <Stack direction="row" className="talent-types"></Stack>
+        </Stack>
+        <Stack direction="row" spacing={1} className="talent-text">
+          {name && (
+            <Typography fontWeight="bold" className="talent-name">
+              {name}:
+            </Typography>
+          )}
+          <Typography className="talent-description">{description}</Typography>
+        </Stack>
+      </Stack>
+    </>
   );
 }
 
-export function Group({ name, talents = [] }) {
-  const mapper = (talent, idx) => <Talent {...talent} key={idx} />;
+const talentsMapper = (talent, idx) => <Talent {...talent} key={idx} />;
 
+export function Group({ name, talents = [] }) {
   return (
     <Stack direction="row" spacing={1}>
       <Typography
@@ -306,13 +332,13 @@ export function Group({ name, talents = [] }) {
         {name}
       </Typography>
       <Stack border={1} borderRadius={2} padding={1} flex={1}>
-        {talents.map(mapper)}
+        {talents.map(talentsMapper)}
       </Stack>
     </Stack>
   );
 }
 
-const groupMapper = (group, idx) => <Group {...group} key={idx} />;
+const groupsMapper = (group, idx) => <Group {...group} key={idx} />;
 
 export function CampaignSheetFooter() {
   return (
@@ -333,7 +359,7 @@ export function CampaignSheet() {
   return (
     <Stack className="Campaign-sheet" spacing={1} maxWidth="sm">
       <CampaignSheetHead {...{ useHero, useName }} />
-      {groups.map(groupMapper)}
+      {groups.map(groupsMapper)}
       <CampaignSheetFooter {...{ useDefeated, usePlayed }} />
     </Stack>
   );
