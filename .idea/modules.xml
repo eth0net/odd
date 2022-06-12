@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../cbxconv/cbxconv.iml" filepath="$PROJECT_DIR$/../cbxconv/cbxconv.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cbxmorph/cbxmorph.iml" filepath="$PROJECT_DIR$/../cbxmorph/cbxmorph.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../geckosite/geckosite.iml" filepath="$PROJECT_DIR$/../geckosite/geckosite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../magicgame/magicgame.iml" filepath="$PROJECT_DIR$/../magicgame/magicgame.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../nord/nord.iml" filepath="$PROJECT_DIR$/../nord/nord.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/odd.iml" filepath="$PROJECT_DIR$/.idea/odd.iml" />
+    </modules>
+  </component>
+</project>
