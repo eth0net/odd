@@ -1,24 +1,36 @@
-import { Grid, Stack, TextField, Typography } from "@mui/material";
 import {
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import {
+  CastleOutlined,
   CheckOutlined,
   CircleOutlined,
+  ColorizeOutlined,
   PentagonOutlined,
+  QuestionMarkOutlined,
   SquareOutlined,
+  WarningAmberOutlined,
 } from "@mui/icons-material";
 
 import { useTargetValue } from "../../hooks/useTargetValue";
 import { useState } from "react";
 
 export function EasyIcon({ sx = {}, ...rest }) {
-  return <CircleOutlined sx={{ ...sx, color: "limegreen" }} {...rest} />;
+  return <CircleOutlined sx={{ color: "limegreen", ...sx }} {...rest} />;
 }
 
 export function MediumIcon({ sx = {}, ...rest }) {
-  return <SquareOutlined sx={{ ...sx, color: "gold" }} {...rest} />;
+  return <SquareOutlined sx={{ color: "gold", ...sx }} {...rest} />;
 }
 
 export function HardIcon({ sx = {}, ...rest }) {
-  return <PentagonOutlined sx={{ ...sx, color: "red" }} {...rest} />;
+  return <PentagonOutlined sx={{ color: "red", ...sx }} {...rest} />;
 }
 
 export function LabelledIcon({
@@ -46,7 +58,7 @@ export function CampaignSheetHead({ useHero, useName }) {
 
   return (
     <Stack direction="row" className="Campaign-sheet-head" spacing={1}>
-      <Stack spacing={1}>
+      <Stack spacing={1} flex={1}>
         <TextField
           id="hero"
           label="Hero"
@@ -64,12 +76,17 @@ export function CampaignSheetHead({ useHero, useName }) {
           variant="standard"
         />
       </Stack>
-      <Stack spacing={1}>
+      <Stack
+        spacing={1}
+        borderRight={1}
+        paddingRight={1}
+        justifyContent="space-evenly"
+      >
         <LabelledIcon label="Any Dungeon" after icon={EasyIcon} />
         <LabelledIcon label="Medium / Hard" after icon={MediumIcon} />
         <LabelledIcon label="Hard only" after icon={HardIcon} />
       </Stack>
-      <Stack spacing={1}>
+      <Stack spacing={1} justifyContent="space-evenly">
         <LabelledIcon label="Complete a Floor" icon={CheckOutlined} />
         <LabelledIcon label="Level Up" icon={CheckOutlined} />
         <LabelledIcon label="Defeat a Boss" icon={CheckOutlined} count={3} />
@@ -282,46 +299,93 @@ const sheets = {
   },
 };
 
-const pointMapper = (_, idx) => (
-  <Grid item xs={1} key={idx}>
-    <EasyIcon />
-  </Grid>
-);
+const pointsMapper = (point, i) => {
+  const size = 16;
+  const rows = 2;
+  const cols = point / rows;
+  return (
+    <Grid
+      container
+      columns={cols}
+      maxWidth={cols * size}
+      maxHeight={rows * size}
+      lineHeight={0}
+      justifyContent="center"
+      key={i}
+    >
+      {[...Array(point)].map((_, j) => (
+        <Grid item xs={1} maxWidth="min-content" key={j}>
+          {i === 0 && <EasyIcon sx={{ fontSize: size }} />}
+          {i === 1 && <MediumIcon sx={{ fontSize: size }} />}
+          {i === 2 && <HardIcon sx={{ fontSize: size }} />}
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
 
-const pointsMapper = (point, idx) => (
-  <Grid container columns={point / 2} key={idx}>
-    {[...Array(point)].map(pointMapper)}
-  </Grid>
-);
+const encounterMapper = (encounter) => {
+  switch (encounter) {
+    case "boss":
+      return <CastleOutlined />;
+    case "combat":
+      return <ColorizeOutlined />;
+    case "peril":
+      return <WarningAmberOutlined />;
+    default:
+      return <QuestionMarkOutlined />;
+  }
+};
 
-export function Talent({ name, description, points, ...rest }) {
+export function Encounters({ list = [] }) {
+  return (
+    <Stack direction="row" className="encounters">
+      {list.map(encounterMapper)}
+    </Stack>
+  );
+}
+
+export function Talent({ name, description, points, encounters }) {
   return (
     <>
-      <Stack direction="row" className="talent" {...rest}>
-        <Stack direction="row" spacing={1} className="talent-stats">
-          <Stack direction="row" className="talent-points">
+      <Grid item xs={encounters ? 8 : 6} className="talent-stats">
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          spacing={1}
+        >
+          <Stack
+            direction="row"
+            justifyContent="start"
+            className="talent-points"
+            flexShrink={0}
+          >
             {points.map(pointsMapper)}
           </Stack>
-          <Stack direction="row" className="talent-types"></Stack>
+          {encounters && <Encounters list={encounters} />}
         </Stack>
-        <Stack direction="row" spacing={1} className="talent-text">
-          {name && (
-            <Typography fontWeight="bold" className="talent-name">
-              {name}:
-            </Typography>
-          )}
-          <Typography className="talent-description">{description}</Typography>
-        </Stack>
-      </Stack>
+      </Grid>
+      <Grid
+        item
+        xs={encounters ? 16 : 18}
+        sx={{ ":not(:last-child)": { borderBottom: 1 } }}
+        display="flex"
+        alignItems="center"
+        className="talent-text"
+      >
+        <Typography>
+          {name && <strong>{name}: </strong>}
+          {description}
+        </Typography>
+      </Grid>
     </>
   );
 }
 
-const talentsMapper = (talent, idx) => <Talent {...talent} key={idx} />;
-
 export function Group({ name, talents = [] }) {
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="row" spacing={1} className="group">
       <Typography
         border={1}
         borderRadius={2}
@@ -331,20 +395,57 @@ export function Group({ name, talents = [] }) {
       >
         {name}
       </Typography>
-      <Stack border={1} borderRadius={2} padding={1} flex={1}>
-        {talents.map(talentsMapper)}
-      </Stack>
+      <Grid
+        container
+        columns={24}
+        border={1}
+        borderRadius={2}
+        spacing={1}
+        paddingBottom={1}
+        paddingRight={1}
+        flex={1}
+      >
+        <Talent {...talents[0]} />
+        <Talent {...talents[1]} />
+        <Talent {...talents[2]} />
+        {talents[3] && <Talent {...talents[3]} />}
+      </Grid>
     </Stack>
   );
 }
 
-const groupsMapper = (group, idx) => <Group {...group} key={idx} />;
+export function CampaignSheetFooter({ bosses, useDefeated, usePlayed }) {
+  const [defeated, setDefeated] = useDefeated;
+  const [played, setPlayed] = usePlayed;
 
-export function CampaignSheetFooter() {
   return (
     <Stack>
-      <Stack direction="row">{/*bosses*/}</Stack>
-      <Stack direction="row">{/*games played*/}</Stack>
+      <Stack direction="row" alignItems="center">
+        <Typography fontWeight="bold">Bosses defeated:</Typography>
+        <FormControlLabel
+          control={<Checkbox checked={defeated[0]} size="small" />}
+          label={bosses[0]}
+        />
+        <FormControlLabel
+          control={<Checkbox checked={defeated[1]} size="small" />}
+          label={bosses[1]}
+        />
+        <FormControlLabel
+          control={<Checkbox checked={defeated[2]} size="small" />}
+          label={bosses[2]}
+        />
+        <FormControlLabel
+          control={<Checkbox checked={defeated[3]} size="small" />}
+          label={bosses[3]}
+        />
+        <FormControlLabel
+          control={<Checkbox checked={defeated[4]} size="small" />}
+          label={bosses[4]}
+        />
+      </Stack>
+      <Stack direction="row">
+        <Typography fontWeight="bold">Games played: {played}</Typography>
+      </Stack>
     </Stack>
   );
 }
@@ -352,16 +453,21 @@ export function CampaignSheetFooter() {
 export function CampaignSheet() {
   const useHero = useTargetValue("");
   const useName = useTargetValue("");
-  const { groups } = sheets.dungeon;
-  const useDefeated = useState([0, 0, 0, 0, 0]);
+  const { groups, bosses } = sheets.dungeon;
+  const useDefeated = useState([false, false, false, false, false]);
   const usePlayed = useState(0);
 
   return (
-    <Stack className="Campaign-sheet" spacing={1} maxWidth="sm">
-      <CampaignSheetHead {...{ useHero, useName }} />
-      {groups.map(groupsMapper)}
-      <CampaignSheetFooter {...{ useDefeated, usePlayed }} />
-    </Stack>
+    <Container className="Campaign-sheet" maxWidth="sm">
+      <Stack spacing={1}>
+        <CampaignSheetHead {...{ useHero, useName }} />
+        <Group {...groups[0]} />
+        <Group {...groups[1]} />
+        <Group {...groups[2]} />
+        <Group {...groups[3]} />
+        <CampaignSheetFooter {...{ bosses, useDefeated, usePlayed }} />
+      </Stack>
+    </Container>
   );
 }
 
